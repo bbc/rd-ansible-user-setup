@@ -1,0 +1,9 @@
+---
+# module: rd-ansible-user-setup/tasks/install
+# description: Install our required packages for rd-ansible-user-setup
+
+- name: Install all required packages for rd-ansible-user-setup
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ packages }}"

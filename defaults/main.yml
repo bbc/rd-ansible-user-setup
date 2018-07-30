@@ -1,0 +1,43 @@
+---
+# name: rd-ansible-user-setup/defaults
+# description: ALL our default variables for rd-ansible-user-setup go in here
+#------------------------------------------------------------------------------
+# Packages - All our required packages we need installing
+#------------------------------------------------------------------------------
+
+# - pre-requisites -
+packages:                               # Packages required for rd-ansible-user-setup
+  - sudo
+
+# Defined user list
+user_list: {}
+
+# user_list:                              # DICT of user
+#   superuser:                            # *REQUIRED* - Username
+#     groups: [ admin ]                   # *NOT REQUIRED* - If undefined, will not have a user created. Admin for SUDO, user for READONLY
+#     public_key: 'ssh-rsa AAAAB..'       # *NOT REQUIRED* - SSH Public key to be added to authorized_key for that user, exclusive single key only
+#     private_key: 'ssh-rsa AAAAB..'      # *NOT REQUIRED* - SSH private key, for things like deploy users
+#     uid: 1234                           # *NOT REQUIRED* - Hard coded UID, if specific is needed
+#     email: test@user.com                # *NOT REQUIRED* - If defined a git config directory will be created
+#     home: /home/user                    # *NOT REQUIRED* - If defined the users home directory will be configured
+#     full_name: first last               # *NOT REQUIRED* - If defined a git config directory will be created
+#     shell: '/bin/zsh'                   # *NOT REQUIRED* - Login shell, default is bash. For service users /bin/false can be used.
+#     useron: [ 'null' ]                  # *NOT REQUIRED* - If defined, the user will only be added on a specific host, matches against FQDN. If trash value used such as null then it can be used to skip all hosts
+#     notuseron: [ 'null' ]               # *NOT REQUIRED* - If defined, the user will be added to all hosts *but* the ones defined
+#   lowleveluser:                         # An example of a user simply added to the readonly user group
+#     groups: [ user ]
+
+# Defined list of users to remove
+removed_users: []
+
+# removed_users
+#  - bob                                  # A list of users to be removed
+
+admin_groups: [ admin, wheel, sudo ]      # A list of groups which are classed as 'admin' which will be added to passwordless sudo
+
+# Default shell if undefined
+users_configure_default_shell: "/bin/bash"
+
+# Forces shell for all users if set
+# users_configure_force_shell: "/bin/rbash"
+users_configure_force_shell: ""

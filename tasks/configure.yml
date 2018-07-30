@@ -1,0 +1,132 @@
+---
+# module: rd-ansible-user-setup/tasks/configure
+# description: Configure the box, most of the work with setting up users and groups is done here.
+
+- name: Allow user since user.value.useron is not defined - user "{{ user.key }}"
+  set_fact:
+    user_allowed_on_host: true
+  when:
+    - user.value.useron is not defined
+
+- name: Disallow user since user.value.useron is defined
+  set_fact:
+    user_allowed_on_host: false
+  when:
+    - user.value.useron is defined
+
+- name: Disallow user on host - when the useron variable is configured, if it doesn't match this host - user "{{ user.key }}"
+  set_fact:
+    user_allowed_on_host: true
+  with_items: "{{ user.value.useron }}"
+  when:
+    - user.value.useron is defined
+    - ansible_fqdn is search(item)
+
+- name: Disallow user on the host - when notuseron variable is configured, if it does match this host - user "{{ user.key }}"
+  set_fact:
+    user_allowed_on_host: false
+  with_items: "{{ user.value.notuseron }}"
+  when:
+    - user.value.notuseron is defined
+    - ansible_fqdn is search(item)
+
+- name: Make sure our users and groups are added
+  block:
+    - name: Ensure groups exist for user "{{ user.key }}" on host
+      group:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ user.value.groups }}"
+      when:
+        - user.value.groups is defined
+        - user.value.groups | length > 0
+
+    - name: Ensure user "{{ user.key }}" exists on host - if rc.8 then user is trying to modify itself and we can assume it exists
+      user:
+        name: "{{ user.key }}"
+        uid: "{{ user.value.uid | default(omit) }}"
+        home: "{{ user.value.home | default(omit) }}"
+        shell: "{{ users_configure_force_shell if users_configure_force_shell | length > 0 else user.value.shell | default(users_configure_default_shell) }}"
+        state: present
+      register: check_fail
+      failed_when: "(check_fail.rc | default(8)) != 8"
+
+    - name: Ensure "{{ user.key }}" has correct groups added
+      user:
+        name: "{{ user.key }}"
+        groups: "{{ user.value.groups | default(omit) }}"
+        state: present
+        append: yes
+      when:
+        - user.value.groups is defined
+        - user.value.groups | length > 0
+
+    - name: Place an ssh public key for "{{ user.key }}" and only allow one key
+      authorized_key:
+        user: "{{ user.key }}"
+        key: "{{ user.value.public_key }}"
+        exclusive: yes
+        manage_dir: yes
+      when:
+        - user.value.public_key is defined
+
+    - name: Check defined user home directory for private key
+      user:
+        name: "{{ user.key }}"
+      register: user_details
+      check_mode: yes
+
+    - name: Make sure ssh directory exists for user "{{ user.key }}"
+      file:
+        path: "{{ user_details.home }}/.ssh"
+        state: directory
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0700
+      when:
+        - user.value.private_key is defined
+
+    - name: Place an ssh private key for "{{ user.key }}"
+      copy:
+        content: "{{ user.value.private_key }}"
+        dest: "{{ user_details.home }}/.ssh/id_rsa"
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0600
+      no_log: true
+      when:
+        - user.value.private_key is defined
+
+    - name: Place an ssh public key for "{{ user.key }}" - assuming we are deploying a private key
+      copy:
+        content: "{{ user.value.public_key }}"
+        dest: "{{ user_details.home }}/.ssh/id_rsa.pub"
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0600
+      when:
+        - user.value.private_key is defined
+        - user.value.public_key is defined
+
+    - name: If email is defined then configure basic git config for "{{ user.key }}"
+      copy:
+        content: |
+          [user]
+              email = {{ user.value.email }}
+              name = {{ user.value.full_name }}
+          [push]
+              default = simple
+        dest: "{{ user_details.home }}/.gitconfig"
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0644
+        force: no
+      when:
+        - user.value.email is defined
+        - user.value.full_name
+
+  when: user_allowed_on_host
+
+  rescue:
+    - name: User not added - Alert
+      debug: msg="{{ user.key }} has not been added properly"

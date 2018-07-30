@@ -1,0 +1,12 @@
+---
+# module: rd-ansible-user-setup/tasks/configure_sudo
+# description: Configure sudo permissions for required groups
+
+- name: Make sure admin group in sudoers have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    line: "%{{ item }} ALL=(ALL) NOPASSWD:ALL"
+    regexp: "^%{{ item }}"
+    state: present
+    validate: 'visudo -cf %s'
+  with_items: "{{ admin_groups }}"

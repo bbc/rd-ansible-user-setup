@@ -1,0 +1,15 @@
+---
+# module: rd-ansible-user-setup/tasks/remove_users
+# description: Remove unneeded users, contained in a block so if a user fails we can see which one and present a message.
+
+- name: Make sure our users are removed - "{{ item }}"
+  block:
+    - name: Ensure user removed - "{{ item }}"
+      user:
+        name: "{{ item }}"
+        state: absent
+        remove: yes
+        
+  rescue:
+    - name: User not removed - Alert
+      debug: msg="{{ item }} has not been removed properly"

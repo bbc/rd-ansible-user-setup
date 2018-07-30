@@ -1,0 +1,19 @@
+---
+# module: rd-ansible-user-setup/tasks
+# description: Set up users on CentOS or Ubuntu based distribution
+
+- name: Install the packages we need
+  include_tasks: install.yml
+
+- name: Configure the box, user configuration
+  include_tasks: configure.yml
+  with_dict: "{{ user_list }}"
+  loop_control:
+    loop_var: user
+
+- name: Configure sudo
+  include_tasks: configure_sudo.yml
+
+- name: Remove the users we have defined
+  include_tasks: remove_users.yml
+  with_items: "{{ removed_users }}"

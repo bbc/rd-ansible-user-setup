@@ -1,0 +1,91 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: false
+  become_method: sudo
+  vars:
+    # Set up our environment if we want CentOS or Ubuntu
+    # Ubuntu
+    python_install_command: "test -e /usr/bin/python || ( export http_proxy={{ proxy_env.http_proxy | default('') }} && apt -y update && apt install -y python-minimal )"
+
+    # Proxy
+    proxy_env:
+      http_proxy: "{{ lookup('env','http_proxy') }}"
+      https_proxy: "{{ lookup('env','https_proxy') }}"
+      rsync_proxy: "{{ lookup('env','rsync_proxy') }}"
+
+    # Users removed from all systems
+    removed_users:
+       - username: abaduser
+
+    # Users to add to the system
+    user_list:
+      ubuntu:
+        groups: [ admin, blargh ]
+      fred:
+        uid: 1723
+        groups: [ admin ]
+        public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDhzTlubzj6ClXh853vnCRrvsfSdqQq6gBc48AaltWIsWtqJ3Z2KAul9ENUY7/WfnPGkO3sUaaRlJbm40qr2HwmJR2t/Jv1RnvK3pMyg+FebRzqhOo/ogvKoDDAdd4oIybluVbqq1myoTqalKiJ0wZFGvD8Zao/upqQ5vFeNTjhiBJ5O20E+SeksOIHJhIMk3U8uiwl2HhsxtUHqorDqlaD2mF8ZkVmn51P3CZoY5nsPsECeaDesH5f/uV6+T0MxZQZrKlJdbNwyvKoFPrdN5LGzOS0qG1jo/BTXUk739nYU5Kpa2SLjY77fZNkIs0V8vOaOg/n99h3SK3j/A1HLlSH'
+      notsofred:
+        groups: [ user ]
+      brokensadfred:
+        other_key: not_relevent
+      genericserviceuser:
+        groups: [ genericserviceuser ]
+        shell: '/bin/false'
+      specialadminuser:
+        groups: [ admin ]
+        public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDeQYPHozA/FI4bOgy4Xu7YJSDyebYYO/GfDqI0HhjChtFkQyKQ8Hln7iJhsn+ndA01IbhvQwPB0pQCy50HJ21ZGOsMEtqSKRFDXYC+KXuHJ+sKJyY9lq8fmDxv3NgaKl0X0jbDO9mlaCgwc5BAHAoo85hEt8At4TbsIeZ/yWJer4fTv1reLCeTV8WV/LNkkGaL6bMTopbZMM/JYrnxgJZ5OpVxAsciEvK012E8IF9M8hPdhb3WOtev6qDPDPcrToMnp1Jno96sDqH+dhd75514/I1ptmq04wPg2lPXMf79ep/Yge8JGhuMZKyZBH4jRYQcELLGxVDONx4LXUtVwAjR'
+        private_key: |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEpAIBAAKCAQEA3kGDx6MwPxSOGzoMuF7u2CUg8nm2GDvxnw6iNB4YwobRZEMi
+          kPB5Z+4iYbJ/p3QNNSG4b0MDwdKUAsudBydtWRjrDBLakikRQ12Avil7hyfrCicm
+          PZavH5g8b9zYGipdF9I2wzvZpWgoMHOQQBwKKPOYRLfALeE27CHmf8liXq+H079a
+          3iwnk1fFlfyzZJBmi+mzE6KW2TDPyWK58YCWeTqVcQLHIhLytNdhPCBfTPIT3YW9
+          1jrXr+qgzwz3K06DJ6dSZ6PerA6h/nYXe+edePyNabZqtOMD4NpT1zH+/Xqf2IHv
+          CRobjGSsmQR+I0WEHBCyxsVQzjceC11LVcAI0QIDAQABAoIBAGHxuzIyLyPNWiaT
+          eWGSrGziR9ezXVTmrb8rgr22+bBYG1S05Tm8T7RGVC57rBfOY7ejaZTWkoRK2WE1
+          +7hYXq7h9Us3z8yTfoESZpbmzwIrzD+IKyj/C6O/wfqF91Hok2fZArsc1/g1o2he
+          tRYbhTqwxsyZsX5Gfp6m/d4YkFoq694v1MUsMyf6e/j9GwnoVGzkZLr8sbVj5mPO
+          HwWSzMvrRcqtdChMVRDzyn9OzwrSnybH1EVq/+whlhriXb6KTlfjrdEG7Hj8KkNi
+          fgQNYwd3QViAUAOj9ePjVFlbRqsWJL3GTmV5CjY3y653+QGalom7539odKOIibMQ
+          tpwPREECgYEA/sVuM807zwbpvv1Om2QQYUTLaoEwXcev/dK/k1R0zVxdcs7BKY9H
+          gR0owFzs6jcQCv5n8GiWGGiJh/DbT58apLZjZZD2RqhOw1kUWgVJ2iFBU44xXtbL
+          3dktx7++9CKqwfVsq4QB0RHITs+q6LZwMX56nPpkk6GsgRBiZg89s2kCgYEA31Pv
+          7Jl2OWYmSARgX9OVSEUHK2yKRgbX5I3DZkJnny4KovUxtwz2WdWmvo5wUrSYWUpq
+          MQxS4GuFod14yD0gdTd2mBoL5uMP+t9zpo3WFXx/HMAbRKaFwdeMtK61Ed8suiOx
+          KVr+/vk0r3392vCnH1x+ilkIFxBBR5Rk0F4LRSkCgYEAorV2ZzD4tIRmvipKjKVA
+          bM6h1xhAynPgqwtwfGhg3FLT/6GZ7a/q68Oypf/y8rZN0aeevAQfb+E7jI0/kz86
+          pd0x58jH8GJHQy1d+QwNmXjJntJeJ4Ko2rt8KGkGTCbjxVG3oGaDPoHL2sF4Fn2F
+          c6aiKiUkHMERSbAsF6A+OJkCgYBbd+t6glgzpizjrjcyyFwKH4uSM4BmsgLWr2Fq
+          jqQWRCtDFx3nlT2JCcKjpX9HwIPtflcEA8Il/KPc6fLAQJj8qVy/a1uYk0NGQyMB
+          AnK+liERy3Tfpzx9aiVNE4lB6qBNFLVI9OYf1D3J6taAR7SLWbzSOSjhGV1DTfoE
+          haAkEQKBgQCL2pkEmqAhYeCN/FBCdQ/wHWvEMWd7NqMVs8xz+JgZHHcwyqjp5CUv
+          /2U3dtC5svUqVXcDQkyfQvHzac7wCSxL/bbWtER+Avx67tkB+BXbyGPc51VliYao
+          AB+qFSZ9xU//ssm3qPRswHXZhuc0kRUD1eNk4zs+CrQ+YbEso8RHbQ==
+          -----END RSA PRIVATE KEY-----
+      notuseron:
+        groups: [ admin ]
+        notuseron: [ 'ubuntu-xenial' ]
+      notuseronubuntu:
+        groups: [ wheel ]
+        notuseron: [ 'ubuntu' ]
+      useron:
+        groups: [ admin ]
+        useron: [ 'ubuntu-xenial' ]
+      undefineduseron:
+        groups: [ admin ]
+      undefineduseronnogroup:
+
+  pre_tasks:
+    - name: Install python2.x for Ansible when we are not using python3
+      raw: "{{ python_install_command }}"
+      changed_when: false
+      when:
+        - ansible_python_interpreter is not defined
+    - name: Gather facts
+      setup:
+        
+  roles:
+    - "{{ playbook_dir | dirname }}"
+  environment: "{{ proxy_env }}"

@@ -6,7 +6,7 @@
   vars:
     # Set up our environment if we want CentOS or Ubuntu
     # Ubuntu
-    python_install_command: "test -e /usr/bin/python || ( export http_proxy={{ proxy_env.http_proxy | default('') }} && apt -y update && apt install -y python-minimal )"
+    python_install_command: "test -e /usr/bin/python3 || ( export http_proxy={{ proxy_env.http_proxy | default('') }} && apt -y update && apt install -y python3-minimal )"
 
     # Proxy
     proxy_env:
@@ -78,7 +78,7 @@
       undefineduseronnogroup:
 
   pre_tasks:
-    - name: Install python2.x for Ansible when we are not using python3
+    - name: Install python3.x for Ansible
       raw: "{{ python_install_command }}"
       changed_when: false
       when:

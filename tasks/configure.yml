@@ -14,21 +14,21 @@
   when:
     - user.value.useron is defined
 
-- name: Disallow user on host - when the useron variable is configured, if it doesn't match this host - user "{{ user.key }}"
+- name: Allow user on host - when the useron variable is configured and contains {{ inventory_hostname }} - user "{{ user.key }}"
   set_fact:
     user_allowed_on_host: true
   with_items: "{{ user.value.useron }}"
   when:
     - user.value.useron is defined
-    - ansible_fqdn is search(item)
+    - inventory_hostname is search(item)
 
-- name: Disallow user on the host - when notuseron variable is configured, if it does match this host - user "{{ user.key }}"
+- name: Disallow user on the host - when notuseron variable is configured, and contains {{ inventory_hostname }}  - user "{{ user.key }}"
   set_fact:
     user_allowed_on_host: false
   with_items: "{{ user.value.notuseron }}"
   when:
     - user.value.notuseron is defined
-    - ansible_fqdn is search(item)
+    - inventory_hostname is search(item)
 
 - name: Make sure our users and groups are added
   block:

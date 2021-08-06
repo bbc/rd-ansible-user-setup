@@ -21,20 +21,30 @@
     # Users to add to the system
     user_list:
       ubuntu:
-        groups: [ admin, blargh ]
+        groups:
+          - name: admin
+          - name: blargh
       fred:
         uid: 1723
-        groups: [ admin ]
+        groups:
+          - name: admin
         public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDhzTlubzj6ClXh853vnCRrvsfSdqQq6gBc48AaltWIsWtqJ3Z2KAul9ENUY7/WfnPGkO3sUaaRlJbm40qr2HwmJR2t/Jv1RnvK3pMyg+FebRzqhOo/ogvKoDDAdd4oIybluVbqq1myoTqalKiJ0wZFGvD8Zao/upqQ5vFeNTjhiBJ5O20E+SeksOIHJhIMk3U8uiwl2HhsxtUHqorDqlaD2mF8ZkVmn51P3CZoY5nsPsECeaDesH5f/uV6+T0MxZQZrKlJdbNwyvKoFPrdN5LGzOS0qG1jo/BTXUk739nYU5Kpa2SLjY77fZNkIs0V8vOaOg/n99h3SK3j/A1HLlSH'
       notsofred:
-        groups: [ user ]
+        groups:
+          - name: user
+      dave:
+        groups:
+          - name: extra
+            gid: 20002
       brokensadfred:
         other_key: not_relevent
       genericserviceuser:
-        groups: [ genericserviceuser ]
+        groups:
+          - name: genericserviceuser
         shell: '/bin/false'
       specialadminuser:
-        groups: [ admin ]
+        groups:
+          - name: admin
         public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDeQYPHozA/FI4bOgy4Xu7YJSDyebYYO/GfDqI0HhjChtFkQyKQ8Hln7iJhsn+ndA01IbhvQwPB0pQCy50HJ21ZGOsMEtqSKRFDXYC+KXuHJ+sKJyY9lq8fmDxv3NgaKl0X0jbDO9mlaCgwc5BAHAoo85hEt8At4TbsIeZ/yWJer4fTv1reLCeTV8WV/LNkkGaL6bMTopbZMM/JYrnxgJZ5OpVxAsciEvK012E8IF9M8hPdhb3WOtev6qDPDPcrToMnp1Jno96sDqH+dhd75514/I1ptmq04wPg2lPXMf79ep/Yge8JGhuMZKyZBH4jRYQcELLGxVDONx4LXUtVwAjR'
         private_key: |
           -----BEGIN RSA PRIVATE KEY-----
@@ -65,16 +75,20 @@
           AB+qFSZ9xU//ssm3qPRswHXZhuc0kRUD1eNk4zs+CrQ+YbEso8RHbQ==
           -----END RSA PRIVATE KEY-----
       notuseron:
-        groups: [ admin ]
+        groups:
+          - name: admin
         notuseron: [ 'ubuntu-xenial' ]
       notuseronubuntu:
-        groups: [ wheel ]
+        groups:
+          - name: wheel
         notuseron: [ 'ubuntu' ]
       useron:
-        groups: [ admin ]
+        groups:
+          - name: admin
         useron: [ 'ubuntu-xenial' ]
       undefineduseron:
-        groups: [ admin ]
+        groups:
+          - name: admin
       undefineduseronnogroup:
 
   pre_tasks:

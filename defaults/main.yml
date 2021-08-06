@@ -14,7 +14,7 @@ user_list: {}
 
 # user_list:                              # DICT of user
 #   superuser:                            # *REQUIRED* - Username
-#     groups: [ admin ]                   # *NOT REQUIRED* - If undefined, will not have a user created. Admin for SUDO, user for READONLY
+#     groups: [ {'name': 'admin'} ]       # *NOT REQUIRED* - If undefined, will not have a user created. Admin for SUDO, user for READONLY
 #     public_key: 'ssh-rsa AAAAB..'       # *NOT REQUIRED* - SSH Public key to be added to authorized_key for that user, exclusive single key only
 #     private_key: 'ssh-rsa AAAAB..'      # *NOT REQUIRED* - SSH private key, for things like deploy users
 #     uid: 1234                           # *NOT REQUIRED* - Hard coded UID, if specific is needed
